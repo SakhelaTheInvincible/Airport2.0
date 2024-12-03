@@ -22,4 +22,4 @@ class Airport extends Model
     {
         return $this->hasMany(Ticket::class, 'destination_airport_id');
     }
-}
+} 

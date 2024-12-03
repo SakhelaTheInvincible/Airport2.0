@@ -17,37 +17,31 @@ class TicketController extends Controller
             'date' => 'nullable|date',
         ]);
 
-        $query = Ticket::where('source_airport_id', $request->source_airport_id)
-            ->where('destination_airport_id', $request->destination_airport_id)
-            ->where('date', '>=', Carbon::now());
+        $query = Ticket::where([
+            ['source_airport_id', $validated['source_airport_id']],
+            ['destination_airport_id', $validated['destination_airport_id']],
+            ['date', '>=', Carbon::now()]
+        ]);
 
-        if ($request->date) {
-            $query->whereDate('date', $request->date);
+        if (!empty($validated['date'])) {
+            $query->whereDate('date', $validated['date']);
         }
 
         $tickets = $query->paginate(10);
         $remainingQuantities = [];
 
-        if (auth()->check()) {
-            $user = auth()->user();
-
+        if ($user = auth()->user()) {
+            $userTickets = $user->tickets()->pluck('quantity', 'ticket_id');
             foreach ($tickets as $ticket) {
-                $purchasedTickets = $user->tickets()
-                    ->where('ticket_id', $ticket->id)
-                    ->sum('quantity');
-
-                $remainingQuantities[$ticket->id] = max(3 - $purchasedTickets, 0);
+                $remainingQuantities[$ticket->id] = max(3 - ($userTickets[$ticket->id] ?? 0), 0);
             }
         }
 
-        $sourceAirport = Airport::find($request->source_airport_id);
-        $destinationAirport = Airport::find($request->destination_airport_id);
-
         return response()->json([
             'tickets' => $tickets,
-            'sourceAirport' => $sourceAirport,
-            'destinationAirport' => $destinationAirport,
-            'remainingQuantities' => $remainingQuantities
+            'sourceAirport' => Airport::find($validated['source_airport_id']),
+            'destinationAirport' => Airport::find($validated['destination_airport_id']),
+            'remainingQuantities' => $remainingQuantities,
         ]);
     }
 

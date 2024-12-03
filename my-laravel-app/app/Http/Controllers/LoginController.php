@@ -1,24 +1,30 @@
 <?php
 
-namespace App\Http\Controllers\Auth;  
+namespace App\Http\Controllers;
 
-use App\Http\Controllers\Controller;  
-use Illuminate\Http\Request;  
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
-class LoginController extends Controller  
-{  
+class LoginController extends Controller
+{
     public function login(Request $request)
     {
+        \Log::info('Login attempt:', $request->all());
+
         $validated = $request->validate([
             'email' => 'required|email',
             'password' => 'required|string|min:6',
         ]);
 
         if (Auth::attempt($validated)) {
-            $request->session()->regenerate();
-            
-            return response()->json(['message' => 'Login successful', 'user' => Auth::user()]);
+            $user = Auth::user();
+            $token = $user->createToken('authToken')->plainTextToken;
+
+            return response()->json([
+                'message' => 'Login successful',
+                'token' => $token,
+                'user' => $user,
+            ]);
         }
 
         return response()->json(['message' => 'Invalid credentials'], 401);
@@ -26,10 +32,7 @@ class LoginController extends Controller
 
     public function logout(Request $request)
     {
-        Auth::logout();
-        $request->session()->invalidate();
-        $request->session()->regenerateToken();
-
-        return response()->json(['message' => 'Logout successful']);
+        $request->user()->currentAccessToken()->delete();
+        return response()->json(['message' => 'Logged out successfully']);
     }
 }

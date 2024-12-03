@@ -1,40 +1,37 @@
 <?php
 
-use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\LoginController;
+use App\Http\Controllers\RegisterController;
 use App\Http\Controllers\TicketController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
+use Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful;
 
-// Authentication Routes
-Route::prefix('auth')->group(function () {
-    Route::post('login', [LoginController::class, 'login'])->name('login');
-    Route::post('logout', [LoginController::class, 'logout'])->name('logout');
-});
 
-// Public Routes
+// authentification
+Route::post('/auth/register', [RegisterController::class, 'register']);
+Route::post('/auth/login', [LoginController::class, 'login'])->middleware('auth:sanctum');
+Route::post('/auth/logout', [LoginController::class, 'logout'])->middleware('auth:sanctum');
+
+// public Routes
 Route::get('/homepage', [HomeController::class, 'index'])->name('homepage');
-
-// Ticket Routes
 Route::get('/tickets/search', [TicketController::class, 'search'])->name('tickets.search');
 
-// Authenticated Routes
 Route::middleware('auth:api')->group(function () {
 
-    // Profile Routes
     Route::get('/profile', [ProfileController::class, 'show'])->name('profile.show');
     Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');
-    
-    // Ticket Purchase Routes
+
     Route::post('/tickets/buy', [TicketController::class, 'buy'])->name('tickets.buy');
     
-    // Admin Routes
+    // admin
     Route::middleware('admin')->get('/admin/tickets', [UserController::class, 'index'])->name('admin.tickets');
 });
 
-// Email Verification Routes
+// email Verification Routes
 Route::middleware('auth:api')->group(function () {
     Route::get('/email/verify', function () {
         return response()->json(['message' => 'Please verify your email.']);

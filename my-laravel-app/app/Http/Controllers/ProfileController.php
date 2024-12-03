@@ -23,24 +23,15 @@ class ProfileController extends Controller
             'password' => 'nullable|string|min:6|confirmed',
         ]);
 
-        $user = auth()->user();
+        $user = $request->user();
 
-        // Update fields
-        if ($request->filled('first_name')) {
-            $user->first_name = $validated['first_name'];
-        }
+        $user->update(array_filter([
+            'first_name' => $validated['first_name'] ?? null,
+            'last_name' => $validated['last_name'] ?? null,
+            'password' => isset($validated['password']) ? bcrypt($validated['password']) : null,
+        ]));
 
-        if ($request->filled('last_name')) {
-            $user->last_name = $validated['last_name'];
-        }
-
-        if ($request->filled('password')) {
-            $user->password = bcrypt($validated['password']);
-        }
-
-        $user->save();
-
-        return response()->json(['message' => 'Profile updated successfully!']);
+        return response()->json(['message' => 'Profile updated successfully!', 'user' => $user]);
     }
 
     public function edit()

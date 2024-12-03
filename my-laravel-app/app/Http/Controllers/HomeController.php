@@ -4,15 +4,14 @@ namespace App\Http\Controllers;
 
 use App\Models\Airport;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 
 class HomeController extends Controller
 {
     public function index()
     {
-        // Get all airports
-        $airports = Airport::all();
-
-        // Return as JSON for Next.js to consume
+        $airports = Cache::remember('airports', 3600, fn() => Airport::all());
+        
         return response()->json($airports);
     }
 }
