@@ -19,14 +19,15 @@ DB_DATABASE=my_airport_app
 DB_USERNAME=postgres  
 DB_PASSWORD=password  
   
-MAIL_MAILER=smtp  
-MAIL_HOST=smtp.gmail.com  
-MAIL_PORT=587  
-MAIL_USERNAME=giorgisaxelashvili580@gmail.com  
-MAIL_PASSWORD=vzckqrxqnsjcosda  
-MAIL_ENCRYPTION=tls  
-MAIL_FROM_ADDRESS=giorgisaxelashvili580@gmail.com  
-MAIL_FROM_NAME="${APP_NAME}"  
+MAIL_MAILER=smtp    
+MAIL_HOST=smtp.gmail.com    
+MAIL_PORT=587     
+MAIL_USERNAME={your gmail}   
+MAIL_PASSWORD={app password}  
+MAIL_ENCRYPTION=tls    
+MAIL_FROM_ADDRESS={your gmail}    
+MAIL_FROM_NAME="${APP_NAME}"     
+    
 
 (This app uses Postgres, so if possible add password to your postgres database, in PgAdmin4 do this: in Login/Group Roles select postgres properties,   
 in Definition tab set password, use that password in DB_Password, Also In PhP directory (php.ini) remove ";" for extension=pdo_pgsql and extension=pgsql)  
